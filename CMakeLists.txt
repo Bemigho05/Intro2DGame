@@ -12,7 +12,7 @@ endif()
 project ("Intro2DGame")
 
 # Add source to this project's executable.
-add_executable (Intro2DGame "main.cpp")
+add_executable (Intro2DGame "main.cpp" "Scene/Scene_Menu.h" "Scene/Scene_Menu.cpp" "Engine/Engine.h" "Engine/Engine.cpp" "Scene/Scene_Play.cpp" "Scene/Scene_Play.h" "Scene/Scene.cpp" "Scene/Scene.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Intro2DGame PROPERTY CXX_STANDARD 20)
