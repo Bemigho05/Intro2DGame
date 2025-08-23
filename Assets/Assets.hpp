@@ -9,7 +9,7 @@
 
 struct TexConf { std::string name, filepath; };
 struct FontConf { std::string name, filepath; };
-struct AnimConf { std::string animName, texName; int frameCount, animSpeed; };
+struct AnimConf { std::string animName, texName; int frameCount, animSpeed, index; bool reverse; };
 
 class Assets {
 
@@ -30,8 +30,8 @@ class Assets {
 		}
 	}
 
-	void addAnimation(const std::string& animName, int index, const std::string& texName, const size_t& frameCount, const size_t& speed) {
-		m_animations[animName] = Animation(animName, index, getTexture(texName), frameCount, speed);
+	void addAnimation(const std::string& animName, const int& index, const std::string& texName, const size_t& frameCount, const size_t& speed, const bool& reverse) {
+		m_animations[animName] = Animation(animName, index, getTexture(texName), frameCount, speed, reverse);
 	}
 
 	void addFont(const std::string& name, const std::string& path) {
@@ -69,8 +69,9 @@ public:
 				addTexture(name, path);
 			}
 			if (tmp == "Animation") {
-				std::string name, path;
-
+				AnimConf animTemp{};
+				file >> animTemp.animName >> animTemp.texName >> animTemp.frameCount >> animTemp.animSpeed >> animTemp.index >> animTemp.reverse;
+				addAnimation(animTemp.animName, animTemp.index, animTemp.texName, animTemp.frameCount, animTemp.animSpeed, animTemp.reverse);
 			}
 		}
 	}
@@ -80,7 +81,7 @@ public:
 		return m_textures.at(name);
 	}
 
-	Animation& getAnimation(const std::string& name) {
+	const Animation& getAnimation(const std::string& name) const {
 		if (!m_animations.contains(name)) { std::cerr << "There's no animation with name: " << name << "\n"; exit(-1); }
 		return m_animations.at(name);
 	}

@@ -1,59 +1,44 @@
 #pragma once
 
 #include <memory>
-
+#include <map>
 #include "../Input/Action.hpp"
 #include "../ECS/EntityManager.hpp"
 
-
-class GameEngine;
+class GameEngine;  // Forward declaration
 
 typedef std::map<int, std::string> ActionMap;
 
 class Scene {
 protected:
-	GameEngine* m_game = nullptr;
-	EntityManager m_entityManager;
-	ActionMap m_actionMap;
-	bool m_paused = false;
-	bool m_hasEnded = false;
-	size_t m_currentFrame = 0;
+    GameEngine* m_game = nullptr;
+    EntityManager m_entityManager;
+    ActionMap m_actionMap;
+    bool m_paused = false;
+    bool m_hasEnded = false;
+    size_t m_currentFrame = 0;
 
-	virtual void onEnd() = 0;
-
-	void setPaused(bool paused);
+    virtual void onEnd() = 0;
+    void setPaused(bool paused);
 
 public:
+    Scene() = default;
+    explicit Scene(GameEngine* gameEngine);
+    virtual ~Scene() = default;
 
-	Scene();
+    virtual void update() = 0;
+    virtual void sDoAction(const Action& action) = 0;
+    virtual void sRender() = 0;
+    virtual void doAction(const Action& action);
 
-	explicit Scene(GameEngine* gameEngine);
+    void simulate(size_t frames);
+    void registerAction(int inputKey, const std::string& actionName);
 
-	virtual ~Scene();
+    float width() const;
+    float height() const;
+    size_t currentFrame() const;
+    bool hasEnded() const;
+    const ActionMap& getActionMap() const;
 
-	virtual void update() = 0;
-
-	virtual void sDoAction(const Action& action) = 0;
-
-	virtual void sRender() = 0;
-
-	virtual void doAction(const Action& action);
-
-	void simulate(size_t frames);
-
-	void registerAction(int inputKey, const std::string& actionName);
-
-	[[nodiscard]] float width() const;
-
-	[[nodiscard]] float height() const;
-
-	[[nodiscard]] size_t currentFrame() const;
-
-	[[nodiscard]] bool hasEnded() const;
-
-	[[nodiscard]] const ActionMap& getActionMap() const;
-
-	void drawLine(const Vec2f& p1, const Vec2f& p2);
+    void drawLine(const Vec2f& p1, const Vec2f& p2);
 };
-
-

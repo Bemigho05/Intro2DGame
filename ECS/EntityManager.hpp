@@ -21,6 +21,10 @@ public:
 	EntityManager() = default;
 
 	void update() {
+
+		m_entities.insert(m_entities.end(), m_entitiesToAdd.begin(), m_entitiesToAdd.end());
+		m_entitiesToAdd.erase(m_entitiesToAdd.begin(), m_entitiesToAdd.end());
+
 		removeDeadEntities(m_entities);
 		for (auto& [tag, entityVec] : m_entityMap) {
 			removeDeadEntities(entityVec);

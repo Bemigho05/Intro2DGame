@@ -1,7 +1,6 @@
 #pragma once
 
-
-#include "Components.h"
+#include "Components.hpp"
 #include <string>
 #include <tuple>
 
@@ -14,7 +13,8 @@ using ComponentTuple = std::tuple <
 	CLifespan,
 	CAnimation,
 	CGravity,
-	CState
+	CState,
+	CShape
 >;
 
 class Entity {

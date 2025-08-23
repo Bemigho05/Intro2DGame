@@ -1,10 +1,10 @@
-﻿// Intro2DGame.cpp : Defines the entry point for the application.
-//
+#include <SFML/Graphics.hpp>
+#include "Engine/GameEngine.hpp"
 
-#include "config.h"
 
-int main()
-{
-	std::cout << "Hello CMake." << std::endl;
-	return 0;
+int main() {
+    GameEngine g("assets.txt");
+    g.run();
+
+    return 0;
 }
