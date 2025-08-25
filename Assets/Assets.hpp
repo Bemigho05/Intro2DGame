@@ -14,7 +14,7 @@ struct AnimConf { std::string texName, animName; int begin, end; };
 class Assets {
 
 	std::map<std::string, sf::Texture> m_textures;
-	std::map<std::string, PlayerAnimation> m_animations;
+	std::map<std::string, PlayerAnimation> m_PlayerAnimations;
 	std::map<std::string, sf::Font> m_fonts;
 
 	void addTexture(const std::string& name, const std::string& path, bool smooth = true) {
@@ -30,8 +30,8 @@ class Assets {
 		}
 	}
 
-	void addAnimation(const std::string& texName, const std::string& animName, const size_t& begin, const size_t& end) {
-		m_animations[animName] = PlayerAnimation(getTexture(texName), animName, begin, end);
+	void addPlayerAnimation(const std::string& texName, const std::string& animName, const size_t& begin, const size_t& end) {
+		m_PlayerAnimations[animName] = PlayerAnimation(getTexture(texName), animName, begin, end);
 	}
 
 	void addFont(const std::string& name, const std::string& path) {
@@ -68,10 +68,10 @@ public:
 				file >> name >> path;
 				addTexture(name, path);
 			}
-			if (tmp == "Animation") {
+			if (tmp == "PlayerAnimation") {
 				AnimConf animTemp{};
 				file >> animTemp.texName >> animTemp.animName >> animTemp.begin >> animTemp.end;
-				addAnimation(animTemp.texName, animTemp.animName, animTemp.begin, animTemp.end);
+				addPlayerAnimation(animTemp.texName, animTemp.animName, animTemp.begin, animTemp.end);
 			}
 		}
 	}
@@ -82,8 +82,8 @@ public:
 	}
 
 	const PlayerAnimation& getAnimation(const std::string& name) const {
-		if (!m_animations.contains(name)) { std::cerr << "There's no animation with name: " << name << "\n"; exit(-1); }
-		return m_animations.at(name);
+		if (!m_PlayerAnimations.contains(name)) { std::cerr << "There's no animation with name: " << name << "\n"; exit(-1); }
+		return m_PlayerAnimations.at(name);
 	}
 
 	const sf::Font& getFont(const std::string& name) const {

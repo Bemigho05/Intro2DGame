@@ -15,12 +15,10 @@ void ScenePlay::init(const std::string& levelPath) {
     registerAction(sf::Keyboard::W, "JUMP");
     registerAction(sf::Keyboard::Space, "SHOOT");
 
-    // TODO: Register all other gameplay Actions
-    // registerAction(sf::Keyboard::W, "JUMP");
+
 
     m_gridText.setCharacterSize(12);
     m_gridText.setFont(m_game->assets().getFont("Tech"));
-    // m_gridText.setFont(m_game->assets().getFont("Tech"));
 
     loadLevel(levelPath);
 }
@@ -43,22 +41,8 @@ void ScenePlay::loadLevel(const std::string& fileName) {
     //       use the PlayerConfig struct m_playerConfig to store player properties
     //       this struct is defined at the top of Scene_Play.h
 
-    // NOTE: all the code below is sample code which shows you how to
-    //       set up and use entities with the new syntax, it should be removed
-
     spawnPlayer();
 
-    //// some sample entities
-    //auto brick = m_entityManager.addEntity("tile");
-    //// IMPORTANT: always add the CAnimation component first so that gridToMidPixel can compute correctly
-    //brick->add<CAnimation>(m_game->assets().getAnimation("Brick"), true);
-    //brick->add<CTransform>(Vec2f(96, 480));
-    //// NOTE: Your final code should position the entity with the grid x,y position read from the file:
-    //// brick->add<CTransform>(gridToMidPixel(gridX, gridY, brick));
-
-    //if (brick->get<CAnimation>().animation.getName() == "Brick") {
-    //    std::cout << "This could be a good way of identifying if a tile is a brick!\n";
-    //}
 
     for (int i = 0; i < 50; ++i) {
         auto block = m_entityManager.addEntity("tile");
@@ -69,127 +53,50 @@ void ScenePlay::loadLevel(const std::string& fileName) {
         block->add<CBoundingBox>(Vec2f(32, 32));
     }
 
-    //for (int i = 0; i < 20; ++i) {
-    //    auto block = m_entityManager.addEntity("tile");
-    //    block->add<CTransform>(Vec2f(64 + 224 + i * 32, 480 - i * 32 * 2));
-    //    block->add<CShape>(32, 32, sf::Color::Magenta, sf::Color::White, 1);
-    //    block->add<CBoundingBox>(Vec2f(32, 32));
-    //}
 
-    
 
-    //auto question = m_entityManager.addEntity("tile");
-    //question->add<CAnimation>(m_game->assets().getAnimation("Ground"), true);
-    //question->add<CTransform>(Vec2f(352, 480));
-
-    // NOTE: THIS IS INCREDIBLY IMPORTANT PLEASE READ THIS EXAMPLE
-    //       Components are now returned as references rather than pointers
-    //       If you do not specify a reference variable type, it will COPY the component
-    //       Here is an example:
-    //
-    //       This will COPY the transform into the variable 'transform1' - it is INCORRECT
-    //       Any changes you make to transform1 will not be changed inside the entity
-    //       auto transform1 = entity->get<CTransform>()
-    //
-    //       This will REFERENCE the transform with the variable 'transform2' - it is CORRECT
-    //       Now any changes you make to transform2 will be changed inside the entity
-    //       auto& transform2 = entity->get<CTransform>()
 }
 
 void ScenePlay::spawnPlayer() {
-    // here is a sample player entity which you can use to construct other entities
+    
     m_player = m_entityManager.addEntity("player");
-    m_player->add<CState>("Stand");
     m_player->add<CTransform>(Vec2f(224, 352));
     m_player->add<CBoundingBox>(m_game->assets().getAnimation("Stand").getSize());
-    m_player->add<CAnimation>(m_game->assets().getAnimation(m_player->get<CState>().state), false);
+    m_player->add<CAnimation>(m_game->assets().getAnimation("Stand"), false);
     m_player->add<CGravity>();
     m_player->add<CInput>();
 
-    // TODO: be sure to add the remaining components to the player
 }
 
 void ScenePlay::spawnBullet(std::shared_ptr<Entity> entity) {
-    auto&& bullet = m_entityManager.addEntity("bullet");
-    bullet->add<CTransform>();
-    bullet->add<CBoundingBox>();
+    
     
 }
 
 void ScenePlay::sMovement() {
     auto& transform = m_player->get<CTransform>();
     auto& input = m_player->get<CInput>();
-    auto& state = m_player->get<CState>();
     auto& gravity = m_player->get<CGravity>();
-    auto& animation = m_player->get<CAnimation>();
-    auto& assets = m_game->assets();
 
-    // Jumping
-    if (input.up && gravity.gravity == 0) {
-        gravity.gravity = -15.0f;
-        if (state.state != "AIR") {
-            state.state = "AIR";
-            animation.animation = assets.getAnimation("Jump");
-        }
-
-    }
-
-    // State management
-    if (gravity.gravity == 0) {
-        if (transform.pos.x == transform.prevPos.x) { // Check if it isn't falling
-            if (state.state != "STAND") {
-                state.state = "STAND";
-                animation.animation = assets.getAnimation("Stand");
-            }
-
-        }
-    }
-
-    // Apply gravity
-    gravity.gravity = gravity.gravity + 0.5f;
     transform.prevPos = transform.pos;
-    transform.pos.y += gravity.gravity;
 
-    // Horizontal movement
     float moveSpeed = 5.0f;
-    if (input.left && !input.right) { // left only
+    if (input.up && gravity.canJump) {
+        m_player->get<CGravity>().canJump = false;
+		gravity.gravity = -15.0f;
+    }
+
+	gravity.gravity += 0.5f;
+	transform.pos.y += gravity.gravity;
+	
+    if (input.left) {
         transform.pos.x -= moveSpeed;
         transform.scale = { -1, 1 };
-        if (state.state != "AIR")
-            if (state.state != "LEFT") {
-                state.state = "LEFT";
-                animation.animation = assets.getAnimation("Run");
-            }
-
-            
     }
-    else if (input.right && !input.left) { // right only
+    if (input.right) {
         transform.pos.x += moveSpeed;
         transform.scale = { 1, 1 };
-        if (state.state != "AIR")
-            if (state.state != "RIGHT") {
-                state.state = "RIGHT";
-                animation.animation = assets.getAnimation("Run");
-            }
     }
-
-    else if (!input.right && !input.left && !input.up) {
-        if (state.state != "AIR")
-            if (state.state != "STAND") {
-                state.state = "STAND";
-                animation.animation = assets.getAnimation("Stand");
-            }
-    }
-    else {
-            if (state.state != "STAND")
-            if (state.state != "AIR") {
-                state.state = "AIR";
-                animation.animation = assets.getAnimation("Jump");
-            }
-        
-    }
-
-    
 }
 
 
@@ -203,23 +110,17 @@ void ScenePlay::sCollision() {
         if (overlap.x > 0 && overlap.y > 0) {
             auto prevOverlap = Physics::GetPreviousOverlap(m_player, e);
 
-            // Vertical collision
             if (prevOverlap.x > 0) {
                 if (m_player->get<CTransform>().pos.y > e->get<CTransform>().pos.y) {
-                    // Player is below tile
                     m_player->get<CTransform>().pos.y += overlap.y;
                 }
                 else {
-                    // Player is above tile (landing)
                     m_player->get<CTransform>().pos.y -= overlap.y;
                     m_player->get<CGravity>().gravity = 0;
-                    if (m_player->get<CState>().state == "AIR") {
-                        m_player->get<CState>().state = "STAND";
-                    }
+					m_player->get<CGravity>().canJump = true;
                 }
             }
 
-            // Horizontal collision
             if (prevOverlap.y > 0) {
                 if (m_player->get<CTransform>().pos.x > e->get<CTransform>().pos.x) {
                     m_player->get<CTransform>().pos.x += overlap.x;
@@ -236,13 +137,12 @@ void ScenePlay::sAnimation()
 {
     
     auto& player_anim = m_player->get<CAnimation>();
-    auto& player_state = m_player->get<CState>().state;
+ 
     if ((player_anim.repeat)) {
         player_anim.animation.update();
     }
        
     else if ((player_anim.animation.hasEnded())) {
-        m_player->add<CState>("STAND");
         player_anim.animation = m_game->assets().getAnimation("Stand");
         player_anim.repeat = true;
     }
@@ -335,51 +235,23 @@ void ScenePlay::sDoAction(const Action& action) {
         else if (action.name() == "TOGGLE_GRID") { m_drawGrid = !m_drawGrid; }
         else if (action.name() == "PAUSE") { setPaused(!m_paused); }
         else if (action.name() == "QUIT") { onEnd(); }
-        else if (action.name() == "JUMP") {
-            if (!m_player->get<CGravity>().gravity)
-            m_player->get<CInput>().up = true;
-            //if (action.type() == "START" && m_player->get<CGravity>().gravity == 0) {
-            //    m_player->get<CGravity>().gravity = -15.0f;
-            //    m_player->get<CState>().state = "AIR";
-            //    m_player->get<CAnimation>().animation = m_game->assets().getAnimation("Air");
-            //    m_player->get<CAnimation>().repeat = false;
-            //}
-        }
-        else if (action.name() == "LEFT") {
 
-            m_player->get<CInput>().left = true;
-
-        }
-        else if (action.name() == "RIGHT") {
-            m_player->get<CInput>().right = true;
-
-        }
-        else if (action.name() == "SHOOT") {
-            m_player->get<CInput>().shoot = true;
-        }
+        else if (action.name() == "JUMP") { m_player->get<CInput>().up = true; }
+        else if (action.name() == "LEFT") { m_player->get<CInput>().left = true; }
+        else if (action.name() == "RIGHT") { m_player->get<CInput>().right = true; }
+        else if (action.name() == "ATTACK") { m_player->get<CInput>().attack = true; }
     }
+
+
     else if (action.type() == "END") {
-        if (action.name() == "JUMP") {
-            // m_player jump
-            m_player->get<CInput>().up = false;
-        }
-        else if (action.name() == "LEFT") {
-            m_player->get<CInput>().left = false;
-
-        }
-        else if (action.name() == "RIGHT") {
-            m_player->get<CInput>().right = false;
-            
-        }
-        else if (action.name() == "SHOOT") {
-            m_player->get<CInput>().shoot = true;
-        }
+        if (action.name() == "JUMP") { m_player->get<CInput>().up = false; }
+        else if (action.name() == "LEFT") { m_player->get<CInput>().left = false; }
+        else if (action.name() == "RIGHT") { m_player->get<CInput>().right = false; }
+        else if (action.name() == "ATTACK") { m_player->get<CInput>().attack = false; }
     }
 }
 
-void ScenePlay::onEnd() {
-    // TODO:
-}
+void ScenePlay::onEnd() {}
 
 //    void changePlayerStateTo(PlayerState s);
 //    void spawnCoinSpin(std::shared_ptr<Entity> tile);
@@ -391,7 +263,6 @@ ScenePlay::ScenePlay(GameEngine* gameEngine, const std::string& levelPath) : Sce
 void ScenePlay::update() {
     m_entityManager.update();
 
-    // TODO: implement pause functionality
     sMovement();
     sLifespan();
     sCollision();

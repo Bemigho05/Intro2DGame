@@ -13,7 +13,6 @@ using ComponentTuple = std::tuple <
 	CLifespan,
 	CAnimation,
 	CGravity,
-	CState,
 	CShape
 >;
 

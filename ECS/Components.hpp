@@ -39,7 +39,7 @@ public:
 	bool up = false;
 	bool left = false;
 	bool right = false;
-	bool shoot = false;
+	bool attack = false;
 	bool canShoot = true;
 	bool canJump = true;
 
@@ -65,15 +65,9 @@ public:
 class CGravity : public Component {
 public:
 	float gravity = 0;
+	bool canJump = false;
 	CGravity() = default;
 	CGravity(float g) : gravity(g) {}
-};
-
-class CState : public Component {
-public:
-	std::string state = "default";
-	CState() = default;
-	CState(const std::string& s) : state(s) {}
 };
 
 class CShape : public Component
