@@ -56,11 +56,10 @@ public:
 
 class CAnimation : public Component {
 public:
-	Animation animation;
+	PlayerAnimation animation;
 	bool repeat = false;
-	bool reverse = false;
 	CAnimation() = default;
-	CAnimation(const Animation& animation, bool r) : animation(animation), repeat(r) {}
+	CAnimation(const PlayerAnimation& animation, bool r) : animation(animation), repeat(r) {}
 };
 
 class CGravity : public Component {

@@ -10,7 +10,7 @@ void SceneMenu::init() {
     registerAction(sf::Keyboard::D, "PLAY");
     registerAction(sf::Keyboard::Escape, "QUIT");
 
-    m_title = "Lunatics";
+    m_title = "Warrior";
     int titleSize = 30;
 
     m_menuText.setString(m_title);

@@ -9,12 +9,12 @@
 
 struct TexConf { std::string name, filepath; };
 struct FontConf { std::string name, filepath; };
-struct AnimConf { std::string animName, texName; int frameCount, animSpeed, index; bool reverse; };
+struct AnimConf { std::string texName, animName; int begin, end; };
 
 class Assets {
 
 	std::map<std::string, sf::Texture> m_textures;
-	std::map<std::string, Animation> m_animations;
+	std::map<std::string, PlayerAnimation> m_animations;
 	std::map<std::string, sf::Font> m_fonts;
 
 	void addTexture(const std::string& name, const std::string& path, bool smooth = true) {
@@ -30,8 +30,8 @@ class Assets {
 		}
 	}
 
-	void addAnimation(const std::string& animName, const int& index, const std::string& texName, const size_t& frameCount, const size_t& speed, const bool& reverse) {
-		m_animations[animName] = Animation(animName, index, getTexture(texName), frameCount, speed, reverse);
+	void addAnimation(const std::string& texName, const std::string& animName, const size_t& begin, const size_t& end) {
+		m_animations[animName] = PlayerAnimation(getTexture(texName), animName, begin, end);
 	}
 
 	void addFont(const std::string& name, const std::string& path) {
@@ -70,8 +70,8 @@ public:
 			}
 			if (tmp == "Animation") {
 				AnimConf animTemp{};
-				file >> animTemp.animName >> animTemp.texName >> animTemp.frameCount >> animTemp.animSpeed >> animTemp.index >> animTemp.reverse;
-				addAnimation(animTemp.animName, animTemp.index, animTemp.texName, animTemp.frameCount, animTemp.animSpeed, animTemp.reverse);
+				file >> animTemp.texName >> animTemp.animName >> animTemp.begin >> animTemp.end;
+				addAnimation(animTemp.texName, animTemp.animName, animTemp.begin, animTemp.end);
 			}
 		}
 	}
@@ -81,7 +81,7 @@ public:
 		return m_textures.at(name);
 	}
 
-	const Animation& getAnimation(const std::string& name) const {
+	const PlayerAnimation& getAnimation(const std::string& name) const {
 		if (!m_animations.contains(name)) { std::cerr << "There's no animation with name: " << name << "\n"; exit(-1); }
 		return m_animations.at(name);
 	}

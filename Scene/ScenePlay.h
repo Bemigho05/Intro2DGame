@@ -3,7 +3,7 @@
 #include <map>
 #include <memory>
 
-#include "../Engine/GameEngine.hpp"  // Must come first (full definition of GameEngine)
+#include "../Engine/GameEngine.hpp"
 #include "ScenePlay.h"
 #include "../ECS/EntityManager.hpp"
 #include "SFML/Graphics/Text.hpp"
@@ -27,7 +27,6 @@ private:
     bool m_drawGrid = true;
     const Vec2f m_gridSize = { 64, 64 };
     sf::Text m_gridText;
-    // Physics m_worldPhysics;
 
     void init(const std::string& levelPath);
 

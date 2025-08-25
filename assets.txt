@@ -1,15 +1,10 @@
 Font		Tech		fonts/tech.ttf
 Font		Mario		fonts/mario.ttf
 
-
-Texture		MegaWoman	images/spritesheet_megawoman_strip58.png
-Texture		Bullet		images/spr_bullet_buster.png
+Texture		Warrior		Images/Warrior_Sheet.png
 
 
-Animation   Stand		MegaWoman	6	5	0	0
-Animation	Run			MegaWoman	6	5	8	0
-Animation	ShootRun	MegaWoman	6	5	16	0
-Animation	Spawn		MegaWoman	19	5	24	1
-Animation	Air			MegaWoman	1	0	14	0
-Animation	ShootAir	MegaWoman	1	0	15	0
-Animation	Idle		MegaWoman	6	5	33	0
+PlayerAnimation		Warrior		Stand	0	6
+PlayerAnimation		Warrior		Run		6	14
+PlayerAnimation		Warrior		Jump	48	51
+PlayerAnimation		Warrior		Fall	51	54

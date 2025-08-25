@@ -64,17 +64,17 @@ void ScenePlay::loadLevel(const std::string& fileName) {
         auto block = m_entityManager.addEntity("tile");
 
 
-        block->add<CTransform>(Vec2f(224 + i * 32, 480));
+        block->add<CTransform>(Vec2f(224 + static_cast<float>(i) * 32, 480));
         block->add<CShape>(32, 32, sf::Color::Magenta, sf::Color::White, 1);
         block->add<CBoundingBox>(Vec2f(32, 32));
     }
 
-    for (int i = 0; i < 20; ++i) {
-        auto block = m_entityManager.addEntity("tile");
-        block->add<CTransform>(Vec2f(64 + 224 + i * 32, 480 - i * 32 * 2));
-        block->add<CShape>(32, 32, sf::Color::Magenta, sf::Color::White, 1);
-        block->add<CBoundingBox>(Vec2f(32, 32));
-    }
+    //for (int i = 0; i < 20; ++i) {
+    //    auto block = m_entityManager.addEntity("tile");
+    //    block->add<CTransform>(Vec2f(64 + 224 + i * 32, 480 - i * 32 * 2));
+    //    block->add<CShape>(32, 32, sf::Color::Magenta, sf::Color::White, 1);
+    //    block->add<CBoundingBox>(Vec2f(32, 32));
+    //}
 
     
 
@@ -99,7 +99,7 @@ void ScenePlay::loadLevel(const std::string& fileName) {
 void ScenePlay::spawnPlayer() {
     // here is a sample player entity which you can use to construct other entities
     m_player = m_entityManager.addEntity("player");
-    m_player->add<CState>("Spawn");
+    m_player->add<CState>("Stand");
     m_player->add<CTransform>(Vec2f(224, 352));
     m_player->add<CBoundingBox>(m_game->assets().getAnimation("Stand").getSize());
     m_player->add<CAnimation>(m_game->assets().getAnimation(m_player->get<CState>().state), false);
@@ -129,7 +129,7 @@ void ScenePlay::sMovement() {
         gravity.gravity = -15.0f;
         if (state.state != "AIR") {
             state.state = "AIR";
-            animation.animation = assets.getAnimation("Air");
+            animation.animation = assets.getAnimation("Jump");
         }
 
     }
@@ -184,7 +184,7 @@ void ScenePlay::sMovement() {
             if (state.state != "STAND")
             if (state.state != "AIR") {
                 state.state = "AIR";
-                animation.animation = assets.getAnimation("Air");
+                animation.animation = assets.getAnimation("Jump");
             }
         
     }
