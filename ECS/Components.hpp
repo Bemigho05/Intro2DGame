@@ -40,9 +40,13 @@ public:
 	bool left = false;
 	bool right = false;
 	bool attack = false;
-	bool canShoot = true;
-	bool canJump = true;
+	bool dash = false;
+	bool heavyAttack = false;
 
+	bool attacking = false;
+	bool dashing = false;
+	bool heavyAttacking = false;
+	
 	CInput() = default;
 };
 
@@ -54,26 +58,27 @@ public:
 	CBoundingBox(const Vec2f& s) : size(s), halfSize(s.x / 2, s.y / 2) {}
 };
 
-class CAnimation : public Component {
+class CPlayerAnimation : public Component {
 public:
 	PlayerAnimation animation;
+	bool mustFinish = false;
 	bool repeat = false;
-	CAnimation() = default;
-	CAnimation(const PlayerAnimation& animation, bool r) : animation(animation), repeat(r) {}
+	CPlayerAnimation() = default;
+	CPlayerAnimation(const PlayerAnimation& animation) : animation(animation) {}
 };
+
 
 class CGravity : public Component {
 public:
 	float gravity = 0;
 	bool canJump = false;
 	CGravity() = default;
-	CGravity(float g) : gravity(g) {}
 };
 
 class CShape : public Component
 {
 public:
-	sf::RectangleShape rect;
+	sf::RectangleShape rect{};
 
 	CShape() = default;
 

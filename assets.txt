@@ -1,10 +1,13 @@
-Font		Tech		fonts/tech.ttf
-Font		Mario		fonts/mario.ttf
+Font				Tech		fonts/tech.ttf
+Font				Mario		fonts/mario.ttf
 
-Texture		Warrior		Images/Warrior_Sheet.png
+Texture				Warrior		Images/Warrior_Sheet.png
 
 
-PlayerAnimation		Warrior		Stand	0	6
-PlayerAnimation		Warrior		Run		6	14
-PlayerAnimation		Warrior		Jump	48	51
-PlayerAnimation		Warrior		Fall	51	54
+PlayerAnimation		Warrior		Stand			0	6
+PlayerAnimation		Warrior		Run				6	14
+PlayerAnimation		Warrior		Jump			42	45
+PlayerAnimation		Warrior		Fall			45	48
+PlayerAnimation		Warrior		Attack			14	26
+PlayerAnimation		Warrior		Dash			69	77
+PlayerAnimation		Warrior		HeavyAttack		77	84

@@ -11,7 +11,7 @@ using ComponentTuple = std::tuple <
 	CBoundingBox,
 	CInput,
 	CLifespan,
-	CAnimation,
+	CPlayerAnimation,
 	CGravity,
 	CShape
 >;

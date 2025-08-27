@@ -13,7 +13,9 @@ void ScenePlay::init(const std::string& levelPath) {
     registerAction(sf::Keyboard::A, "LEFT");
     registerAction(sf::Keyboard::D, "RIGHT");
     registerAction(sf::Keyboard::W, "JUMP");
-    registerAction(sf::Keyboard::Space, "SHOOT");
+    registerAction(sf::Keyboard::I, "ATTACK");
+    registerAction(sf::Keyboard::J, "DASH");
+	registerAction(sf::Keyboard::L, "HEAVY_ATTACK");
 
 
 
@@ -62,7 +64,7 @@ void ScenePlay::spawnPlayer() {
     m_player = m_entityManager.addEntity("player");
     m_player->add<CTransform>(Vec2f(224, 352));
     m_player->add<CBoundingBox>(m_game->assets().getAnimation("Stand").getSize());
-    m_player->add<CAnimation>(m_game->assets().getAnimation("Stand"), false);
+    m_player->add<CPlayerAnimation>(m_game->assets().getAnimation("Stand"));
     m_player->add<CGravity>();
     m_player->add<CInput>();
 
@@ -77,23 +79,31 @@ void ScenePlay::sMovement() {
     auto& transform = m_player->get<CTransform>();
     auto& input = m_player->get<CInput>();
     auto& gravity = m_player->get<CGravity>();
+	auto& animation = m_player->get<CPlayerAnimation>();
 
     transform.prevPos = transform.pos;
 
-    float moveSpeed = 5.0f;
-    if (input.up && gravity.canJump) {
+    float moveSpeed{};
+    if (input.up && gravity.canJump && (gravity.gravity == 0.0f)) {
         m_player->get<CGravity>().canJump = false;
 		gravity.gravity = -15.0f;
     }
 
 	gravity.gravity += 0.5f;
 	transform.pos.y += gravity.gravity;
+
+    if (input.dashing) { moveSpeed = 10.0f; }
+    
+    else if (input.heavyAttacking) { moveSpeed = 0.0f; }
+    else if (input.attacking) { moveSpeed = 0.0f; }
+	else moveSpeed = 5.0f;
 	
-    if (input.left) {
+    if (input.left && input.right) {}
+    else if (input.left) {
         transform.pos.x -= moveSpeed;
         transform.scale = { -1, 1 };
     }
-    if (input.right) {
+    else if (input.right) {
         transform.pos.x += moveSpeed;
         transform.scale = { 1, 1 };
     }
@@ -135,20 +145,91 @@ void ScenePlay::sCollision() {
 
 void ScenePlay::sAnimation() 
 {
+    auto& input = m_player->get<CInput>();
+    auto& player_animation = m_player->get<CPlayerAnimation>();
+    auto& gravity = m_player->get<CGravity>();
+
+    if (player_animation.mustFinish)  goto update;
+
+    if (input.heavyAttack) {
+		input.heavyAttacking = true;
+        if (player_animation.animation.getName() != "HeavyAttack") {
+            player_animation.animation = m_game->assets().getAnimation("HeavyAttack");
+            player_animation.mustFinish = true;
+            player_animation.repeat = false;
+        }
+    }
+    else if (input.attack) {
+        input.attacking = true;
+        if (player_animation.animation.getName() != "Attack") {
+            player_animation.animation = m_game->assets().getAnimation("Attack");
+            player_animation.mustFinish = true;
+            player_animation.repeat = false;
+        }
+    }
+    else if (input.dash) {
+        input.dashing = true;
+        if (player_animation.animation.getName() != "Dash") {
+            player_animation.animation = m_game->assets().getAnimation("Dash");
+            player_animation.mustFinish = true;
+            player_animation.repeat = false;
+        }
+    }
+
+
+    else
+        if ((input.left || input.right) && (gravity.canJump) && (input.left != input.right)) {
+            if (player_animation.animation.getName() != "Run") {
+                player_animation.animation = m_game->assets().getAnimation("Run");
+                player_animation.mustFinish = false;
+				player_animation.repeat = true;
+            }
+        }
+        else if ((gravity.gravity > -15.0f) && (gravity.gravity < 0.0f)) {
+            if (player_animation.animation.getName() != "Jump") {
+                player_animation.animation = m_game->assets().getAnimation("Jump");
+                player_animation.mustFinish = false;
+				player_animation.repeat = true;
+            }
+        }
+        else if ((gravity.gravity >= 0.0f) && (!gravity.canJump)) {
+            if (player_animation.animation.getName() != "Fall") {
+                player_animation.animation = m_game->assets().getAnimation("Fall");
+                player_animation.mustFinish = false;
+                player_animation.repeat = true;
+            }
+        }
+        else {
+            if (player_animation.animation.getName() != "Stand") {
+                player_animation.animation = m_game->assets().getAnimation("Stand");
+                player_animation.mustFinish = false;
+                player_animation.repeat = true;
+
+            }
+        }
+
+update:
+
+    if (!(player_animation.animation.hasEnded())) {
+        player_animation.animation.update();
+    }
+    else if ((player_animation.repeat)) {
+        player_animation.animation.update();
+    }
+
     
-    auto& player_anim = m_player->get<CAnimation>();
- 
-    if ((player_anim.repeat)) {
-        player_anim.animation.update();
+    else {
+        auto& name = player_animation.animation.getName();
+        if (name == "HeavyAttack") 
+            input.heavyAttacking = false;
+        else if (name == "Dash") 
+            input.dashing = false;
+        else if (name == "Attack") 
+            input.attacking = false;
+        player_animation.animation = m_game->assets().getAnimation("Stand");
+        player_animation.mustFinish = false;
     }
-       
-    else if ((player_anim.animation.hasEnded())) {
-        player_anim.animation = m_game->assets().getAnimation("Stand");
-        player_anim.repeat = true;
-    }
-    else if (!(player_anim.animation.hasEnded())) {
-        player_anim.animation.update();
-    }
+    
 }
 
 void ScenePlay::sRender() {
@@ -167,12 +248,11 @@ void ScenePlay::sRender() {
     view.setCenter(windowCenterX, m_game->window().getSize().y - view.getCenter().y);
     m_game->window().setView(view);
 
-    // draw all Entity textures / animations
     if (m_drawTextures) {
         for (const auto& e : m_entityManager.getEntities()) {
             auto& transform = e->get<CTransform>();
-            if (e->has<CAnimation>()) {
-                auto& animation = e->get<CAnimation>().animation;
+            if (e->has<CPlayerAnimation>()) {
+                auto& animation = e->get<CPlayerAnimation>().animation;
                 animation.getSprite().setRotation(transform.angle);
                 animation.getSprite().setPosition(transform.pos.x, transform.pos.y);
                 animation.getSprite().setScale(transform.scale.x, transform.scale.y);
@@ -240,6 +320,8 @@ void ScenePlay::sDoAction(const Action& action) {
         else if (action.name() == "LEFT") { m_player->get<CInput>().left = true; }
         else if (action.name() == "RIGHT") { m_player->get<CInput>().right = true; }
         else if (action.name() == "ATTACK") { m_player->get<CInput>().attack = true; }
+        else if (action.name() == "DASH") { m_player->get<CInput>().dash = true; }
+        else if (action.name() == "HEAVY_ATTACK") { m_player->get<CInput>().heavyAttack = true; }
     }
 
 
@@ -248,6 +330,8 @@ void ScenePlay::sDoAction(const Action& action) {
         else if (action.name() == "LEFT") { m_player->get<CInput>().left = false; }
         else if (action.name() == "RIGHT") { m_player->get<CInput>().right = false; }
         else if (action.name() == "ATTACK") { m_player->get<CInput>().attack = false; }
+        else if (action.name() == "DASH") { m_player->get<CInput>().dash = false; }
+		else if (action.name() == "HEAVY_ATTACK") { m_player->get<CInput>().heavyAttack = false; }
     }
 }
 

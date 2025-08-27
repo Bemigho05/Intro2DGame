@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 #include <SFML/Graphics.hpp>
 
 #include "../Vector/Vec2.hpp"
@@ -41,19 +42,24 @@ public:
 	~PlayerAnimation() = default;
 
 	void update() {
-		if (++m_currentFrame >= m_speed) {
-			m_currentFrame = 0;
-			m_pointer++;
+		m_currentFrame++;
+		if (m_currentFrame >= m_speed) {
+			if (m_pointer >= m_end) m_pointer = m_begin;
+			
+			
 
-			if(m_pointer >= m_end) m_pointer = m_begin;
 			size_t row{}, col{};
 			col = m_pointer % 6;
 			row = m_pointer / 6;
 			m_sprite.setTextureRect(sf::IntRect(static_cast<int>(col * m_size.x), static_cast<int>(row * m_size.y), static_cast<int>(m_size.x), static_cast<int>(m_size.y)));
+			m_pointer++;
+			m_currentFrame = 0;
 		}
 	}
 
-	bool hasEnded() const { return m_pointer >= m_end; }
+	bool hasEnded() const {
+		return m_pointer >= m_end; 
+	}
 	const std::string& getName() const { return m_name; }
 	const Vec2f& getSize() const { return m_size; }
 	sf::Sprite& getSprite() { return m_sprite; }
