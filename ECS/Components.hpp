@@ -2,6 +2,7 @@
 
 #include "../Vector/Vec2.hpp"
 #include "../Animation/Animation.hpp"
+#include <memory>
 
 
 class Component {
@@ -58,13 +59,53 @@ public:
 	CBoundingBox(const Vec2f& s) : size(s), halfSize(s.x / 2, s.y / 2) {}
 };
 
-class CPlayerAnimation : public Component {
+class CAnimation : public Component {
+	std::unique_ptr<Animation> animation = nullptr;
 public:
-	PlayerAnimation animation;
 	bool mustFinish = false;
 	bool repeat = false;
-	CPlayerAnimation() = default;
-	CPlayerAnimation(const PlayerAnimation& animation) : animation(animation) {}
+	CAnimation() = default;
+	~CAnimation() = default;
+
+	template<typename T, typename = std::enable_if_t<std::is_base_of_v<Animation, T>>>
+	CAnimation(const T& anim) : animation(std::make_unique<T>(anim)) {}
+
+	template<typename T, typename = std::enable_if_t<std::is_base_of_v<Animation, T>>>
+	CAnimation& operator=(const T& anim) {
+		animation = std::make_unique<T>(anim);
+		return *this;
+	}
+
+	CAnimation(const CAnimation&) = delete;
+	CAnimation& operator=(const CAnimation&) = delete;
+
+	CAnimation(CAnimation&& other) noexcept
+		: animation(std::move(other.animation)), mustFinish(other.mustFinish), repeat(other.repeat) {
+	}
+
+	CAnimation& operator=(CAnimation&& other) noexcept {
+		if (this != &other) {
+			animation = std::move(other.animation);
+			mustFinish = other.mustFinish;
+			repeat = other.repeat;
+		}
+		return *this;
+	}
+
+	void update() const { if (animation) animation->update(); }
+	const bool hasEnded() const { return animation ? animation->hasEnded() : true; }
+	const std::string& getName() const {
+		static std::string empty = "none";
+		return animation ? animation->getName() : empty;
+	}
+	const Vec2f& getSize() const {
+		static Vec2f zero = { 0.0f, 0.0f };
+		return animation ? animation->getSize() : zero;
+	}
+	sf::Sprite& getSprite() const {
+		static sf::Sprite dummy;
+		return animation ? animation->getSprite() : dummy;
+	}
 };
 
 
@@ -89,5 +130,12 @@ public:
 		rect.setOutlineColor(outline);
 		rect.setOutlineThickness(thickness);
 		rect.setOrigin(width / 2.0f, height / 2.0f);
+	}
+	void setPosition(const Vec2f& pos) {
+		rect.setPosition(pos.x, pos.y);
+	}
+
+	Vec2f getPosition() const {
+		return Vec2f(rect.getPosition().x, rect.getPosition().y);
 	}
 };

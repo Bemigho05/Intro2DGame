@@ -24,7 +24,7 @@ private:
     PlayerConfig m_playerConfig;
     bool m_drawTextures = true;
     bool m_drawCollision = true;
-    bool m_drawGrid = true;
+    bool m_drawGrid = true; 
     const Vec2f m_gridSize = { 64, 64 };
     sf::Text m_gridText;
 

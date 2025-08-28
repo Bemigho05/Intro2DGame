@@ -81,7 +81,7 @@ public:
 		return m_textures.at(name);
 	}
 
-	const PlayerAnimation& getAnimation(const std::string& name) const {
+	 const PlayerAnimation& getPlayerAnimation(const std::string& name) const {
 		if (!m_PlayerAnimations.contains(name)) { std::cerr << "There's no animation with name: " << name << "\n"; exit(-1); }
 		return m_PlayerAnimations.at(name);
 	}
